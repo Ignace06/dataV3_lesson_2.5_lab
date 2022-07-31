@@ -25,9 +25,7 @@ select convert(varchar, avg(length), 8) from film;
 -- 1h55mn
 
 -- How many distinct (different) actors' last names are there?
-select * from actor;
 select count(distinct last_name) from actor;
--- 121 distinct actors
 
 -- Since how many days has the company been operating (check DATEDIFF() function)?
 select * from rental;
@@ -35,18 +33,46 @@ select datediff(min(return_date), max(return_date)) from rental;
 -- operating 100 days, I don't know where to get the data
 
 -- Show rental info with additional columns month and weekday. Get 20 results.
-select *, EXTRACT(MONTH FROM(convert(rental_date, date))) as month, FORMAT(convert(rental_date, date),'dddd') 'Day Name'
-from rental
+select *, date_format(convert(rental_date, date), "%M") as month, date_format(convert(rental_date, date), "%W") as Weekday from rental
 limit 20;
 
+
 -- Add an additional column day_type with values 'weekend' and 'workday' depending on the rental day of the week.
+select 
+*, 
+date_format(convert(rental_date, date), "M") as month,
+date_format(convert(rental_date, date), "W") as Weekday,
+case
+when date_format(convert(rental_date, date), "W") = 'Saturday' then 'weekend'
+when date_format(convert(rental_date, date), "W") = 'Sunday' then 'weekend'
+else 'Workday'
+end as Day
+from rental;
+
+select 
+*, 
+date_format(convert(rental_date, date), '%M') as month, 
+date_format(convert(rental_date, date), '%W') as Weekday, 
+case 
+when date_format(convert(rental_date, date), '%M') = 'Saturday' then 'weekend' 
+when date_format(convert(rental_date, date), '%M') = 'Sunday' then 'weekend' 
+else 'Workday' 
+end as Day 
+from rental;
+
+
 
 -- Get release years.
 select *, EXTRACT(year FROM(convert(rental_date, date))) as Year from rental;
 
 -- Get all films with ARMAGEDDON in the title.
-select * from film
+select title from film
 where title like '%ARMAGEDDON%';
+
+select title from film 
+where title regexp 'ARMAGEDDON$' or title regexp '^ARMAGEDDON'
+limit 100;
+
 
 -- Get all films which title ends with APOLLO.
 select * from film
@@ -61,7 +87,8 @@ limit 10;
 select title, special_features from film
 where special_features like '%Behind the Scenes';
 
-select count(special_features like 'Behind the Scenes%') from film;
+select count(special_features like '%Behind the Scenes%') from film
+group by count(special_features like '%Behind the Scenes%')
 
 -- 538 films
 
